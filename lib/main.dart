@@ -1,6 +1,8 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'item.dart';
+import 'guess.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,7 +16,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'The Price Is Right App',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
@@ -29,9 +31,13 @@ class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
   var history = <WordPair>[];
 
+  var currentItem = Item.getRandomItem();
+  var guessHistory = <Guess>[];
+  double currentGuess = 0.0;
+
   void getNext() {
-    history.add(current);
-    current = WordPair.random();
+    guessHistory.add(Guess(item: currentItem, guessedPrice: currentGuess));
+    currentItem = Item.getRandomItem();
     notifyListeners();
   }
 
@@ -45,6 +51,11 @@ class MyAppState extends ChangeNotifier {
       favorites.add(pair);
     }
     notifyListeners();
+  }
+
+  void addGuess(double guess) {
+    currentGuess = guess;
+    getNext();
   }
 }
 
@@ -113,6 +124,7 @@ class GeneratorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
+    var item = appState.currentItem;
 
     IconData icon;
     if (appState.favorites.contains(pair)) {
@@ -146,7 +158,7 @@ class GeneratorPage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10),
-          BigCard(pair: pair),
+          GuesserCard(item: item),
           Expanded(
             flex: 3,
             child: HistoryView(),
@@ -161,39 +173,32 @@ class HistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var history = appState.history.reversed;
+    var history = appState.guessHistory.reversed;
 
     // Avoid overflow | Ref.: https://stackoverflow.com/a/64121579/10115198
     return Wrap(children: [
-      for (var pair in history)
+      for (var guess in history)
         Center(
-          child: TextButton.icon(
-            onPressed: () {
-              appState.toggleFavorite(pair);
-            },
-            icon: appState.favorites.contains(pair)
-                ? Icon(Icons.favorite, size: 12)
-                : SizedBox(),
-            label: Text(
-              pair.asCamelCase,
-              semanticsLabel: pair.asPascalCase,
-            ),
+          child: Text(
+            "${guess.item.name} - ${guess.guessedPrice - guess.item.price}€",
+            semanticsLabel: guess.item.name,
           ),
         ),
     ]);
   }
 }
 
-class BigCard extends StatelessWidget {
-  const BigCard({
+class GuesserCard extends StatelessWidget {
+  const GuesserCard({
     super.key,
-    required this.pair,
+    required this.item,
   });
 
-  final WordPair pair;
+  final Item item;
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
     var theme = Theme.of(context);
     var style = theme.textTheme.displayMedium!.copyWith(
       color: theme.colorScheme.onPrimary,
@@ -204,10 +209,46 @@ class BigCard extends StatelessWidget {
       elevation: 6,
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: Text(
-          pair.asPascalCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
+        child: Column(
+          children: [
+            Text(
+              item.name,
+              style: style,
+              semanticsLabel: item.name,
+            ),
+            Text(
+              "${item.price}€",
+              style: style,
+              semanticsLabel: "${item.price}€",
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Enter your guess',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {},
+                child: Text('Submit Guess'),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_controller.text.isNotEmpty) {
+                  double guess = double.parse(_controller.text);
+                  appState.addGuess(guess);
+                }
+              },
+              child: Text('Guess'),
+            ),
+          ],
         ),
       ),
     );
