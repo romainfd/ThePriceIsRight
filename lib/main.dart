@@ -138,27 +138,9 @@ class GeneratorPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Spacer(flex: 3),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
           SizedBox(height: 10),
           GuesserCard(item: item),
+          SizedBox(height: 20),
           Expanded(
             flex: 3,
             child: HistoryView(),
@@ -188,13 +170,32 @@ class HistoryView extends StatelessWidget {
   }
 }
 
-class GuesserCard extends StatelessWidget {
+class GuesserCard extends StatefulWidget {
   const GuesserCard({
-    super.key,
+    Key? key,
     required this.item,
-  });
+  }) : super(key: key);
 
   final Item item;
+
+  @override
+  State<GuesserCard> createState() => _GuesserCardState();
+}
+
+class _GuesserCardState extends State<GuesserCard> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,53 +205,59 @@ class GuesserCard extends StatelessWidget {
       color: theme.colorScheme.onPrimary,
     );
 
-    return Card(
-      color: theme.colorScheme.primary,
-      elevation: 6,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(
-              item.name,
-              style: style,
-              semanticsLabel: item.name,
-            ),
-            Text(
-              "${item.price}€",
-              style: style,
-              semanticsLabel: "${item.price}€",
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _controller,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Enter your guess',
-                  border: OutlineInputBorder(),
-                ),
+    return Column(
+      children: [
+        Container(
+          width: 300,
+          child: Card(
+            color: theme.colorScheme.primary,
+            elevation: 6,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Text(
+                    widget.item.name,
+                    style: style,
+                    semanticsLabel: widget.item.name,
+                  ),
+                  Text(
+                    "${widget.item.price}€",
+                    style: style,
+                    semanticsLabel: "${widget.item.price}€",
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text('Submit Guess'),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_controller.text.isNotEmpty) {
-                  double guess = double.parse(_controller.text);
-                  appState.addGuess(guess);
-                }
-              },
-              child: Text('Guess'),
-            ),
-          ],
+          ),
         ),
-      ),
+        SizedBox(height: 20),
+        Container(
+          width: 200,
+          child: TextField(
+              onSubmitted: (String value) {
+                double guess = double.parse(_controller.text);
+                appState.addGuess(guess);
+              },
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Enter your guess !',
+                border: OutlineInputBorder(),
+              )),
+        ),
+        SizedBox(height: 20),
+        ElevatedButton.icon(
+          onPressed: () {
+            if (_controller.text.isNotEmpty) {
+              double guess = double.parse(_controller.text);
+              appState.addGuess(guess);
+            }
+          },
+          icon: Icon(Icons.send),
+          label: Text('Guess'),
+        ),
+      ],
     );
   }
 }
