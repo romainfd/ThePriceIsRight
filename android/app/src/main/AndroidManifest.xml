@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.the_price_is_right">
-   <application
+    <!-- Needed for Image.network | Ref.: https://docs.flutter.dev/data-and-backend/networking#platform-notes -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
         android:label="the_price_is_right"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

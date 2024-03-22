@@ -184,16 +184,19 @@ class GuesserCard extends StatefulWidget {
 
 class _GuesserCardState extends State<GuesserCard> {
   late TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _focusNode.requestFocus();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -216,6 +219,12 @@ class _GuesserCardState extends State<GuesserCard> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
+                  Image.network(
+                    widget.item.imageUrl,
+                    width: 100, // Adjust width as needed
+                    height: 100, // Adjust height as needed
+                    fit: BoxFit.cover, // Adjust the fit of the image
+                  ),
                   Text(
                     widget.item.name,
                     style: style,
@@ -235,6 +244,7 @@ class _GuesserCardState extends State<GuesserCard> {
         Container(
           width: 200,
           child: TextField(
+              focusNode: _focusNode,
               onSubmitted: (String value) {
                 double guess = double.parse(_controller.text);
                 appState.addGuess(guess);

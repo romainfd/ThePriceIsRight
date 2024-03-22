@@ -1,9 +1,21 @@
 import 'dart:math';
 
 List<Item> itemList = [
-  Item(imageUrl: 'url1', name: 'Item 1', price: 10.0),
-  Item(imageUrl: 'url2', name: 'Item 2', price: 20.0),
-  Item(imageUrl: 'url3', name: 'Item 3', price: 30.0),
+  Item(
+      imageUrl:
+          'https://static.vecteezy.com/system/resources/previews/027/216/290/original/red-carrot-red-carrot-transparent-background-ai-generated-free-png.png',
+      name: '1kg de carottes',
+      price: 1.86),
+  Item(
+      imageUrl:
+          'https://static.vecteezy.com/system/resources/previews/027/216/290/original/red-carrot-red-carrot-transparent-background-ai-generated-free-png.png',
+      name: 'Item 2',
+      price: 20.0),
+  Item(
+      imageUrl:
+          'https://static.vecteezy.com/system/resources/previews/027/216/290/original/red-carrot-red-carrot-transparent-background-ai-generated-free-png.png',
+      name: 'Item 3',
+      price: 30.0),
 ];
 
 class Item {
