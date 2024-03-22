@@ -1,6 +1,6 @@
 {
-    "name": "gsoc_demo",
-    "short_name": "gsoc_demo",
+    "name": "the_price_is_right",
+    "short_name": "the_price_is_right",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,4 +1,4 @@
-# gsoc_demo
+# the_price_is_right
 
 A new Flutter project.
 

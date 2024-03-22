@@ -1,5 +1,5 @@
-name: gsoc_demo
-description: Romain Fouilland's GSoC application demo app.
+name: the_price_is_right
+description: The Price Is Right demo app.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
