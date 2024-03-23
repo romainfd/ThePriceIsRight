@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-const String defaultItemType = "home";
+const String defaultItemType = "all";
 
 class MyAppState extends ChangeNotifier {
   String _itemType = defaultItemType; // Private variable to store itemType
@@ -70,6 +70,9 @@ class _MyHomePageState extends State<MyHomePage> {
         itemType = defaultItemType;
         break;
       case 1:
+        itemType = "home";
+        break;
+      case 2:
         itemType = "food";
         break;
       default:
@@ -84,6 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: NavigationRail(
                 extended: constraints.maxWidth >= 600,
                 destinations: [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.all_inbox),
+                    label: Text('All'),
+                  ),
                   NavigationRailDestination(
                     icon: Icon(Icons.home),
                     label: Text('Home'),
@@ -292,7 +299,7 @@ class _GuesserCardState extends State<GuesserCard> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 suffixText: '€',
-                contentPadding: EdgeInsets.symmetric(horizontal: 35.0),
+                contentPadding: EdgeInsets.symmetric(horizontal: 30),
                 labelText: 'Enter your guess',
                 border: OutlineInputBorder(),
               )),

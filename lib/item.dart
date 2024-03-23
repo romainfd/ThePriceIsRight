@@ -46,6 +46,11 @@ class ItemDict {
   };
 
   static Item getRandomItem(String itemType) {
+    if (itemType == 'all') {
+      // Get a random key from the map
+      List<String> keys = itemDict.keys.toList();
+      itemType = keys[Random().nextInt(keys.length)];
+    }
     final List<Item>? itemList = itemDict[itemType];
     if (itemList == null || itemList.isEmpty) {
       throw Exception('No items found for the specified type');
