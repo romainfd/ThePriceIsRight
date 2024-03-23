@@ -1,4 +1,4 @@
-import 'item.dart'; // Import the Item class from the item.dart file
+import 'item.dart';
 
 class Guess {
   Item item;
@@ -8,4 +8,6 @@ class Guess {
     required this.item,
     required this.guessedPrice,
   });
+
+  double get score => 100 * (guessedPrice - item.price).abs();
 }

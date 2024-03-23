@@ -1,5 +1,5 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'item.dart';
 import 'guess.dart';
@@ -27,29 +27,24 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-  var history = <WordPair>[];
+const String defaultItemType = "home";
 
-  var currentItem = Item.getRandomItem();
+class MyAppState extends ChangeNotifier {
+  String _itemType = defaultItemType; // Private variable to store itemType
+  var currentItem = ItemDict.getRandomItem(defaultItemType);
   var guessHistory = <Guess>[];
   double currentGuess = 0.0;
 
-  void getNext() {
-    guessHistory.add(Guess(item: currentItem, guessedPrice: currentGuess));
-    currentItem = Item.getRandomItem();
-    notifyListeners();
+  String get itemType => _itemType; // Getter for itemType
+
+  void setItemType(String type) {
+    _itemType = type;
+    // notifyListeners(); // Notify listeners of the change
   }
 
-  var favorites = <WordPair>{};
-
-  void toggleFavorite([WordPair? pair]) {
-    pair = pair ?? current;
-    if (favorites.contains(pair)) {
-      favorites.remove(pair);
-    } else {
-      favorites.add(pair);
-    }
+  void getNext() {
+    guessHistory.add(Guess(item: currentItem, guessedPrice: currentGuess));
+    currentItem = ItemDict.getRandomItem(_itemType);
     notifyListeners();
   }
 
@@ -69,16 +64,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
+    String itemType;
     switch (selectedIndex) {
       case 0:
-        page = GeneratorPage();
+        itemType = defaultItemType;
         break;
       case 1:
-        page = FavoritesPage();
+        itemType = "food";
         break;
       default:
-        throw UnimplementedError('no widget for $selectedIndex');
+        throw UnimplementedError('no itemType for $selectedIndex');
     }
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -94,8 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     label: Text('Home'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
+                    icon: Icon(Icons.fastfood),
+                    label: Text('Food'),
                   ),
                 ],
                 selectedIndex: selectedIndex,
@@ -109,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: Container(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
+                child: GuessPage(itemType: itemType),
               ),
             ),
           ],
@@ -119,28 +114,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class GeneratorPage extends StatelessWidget {
+class GuessPage extends StatelessWidget {
+  final String itemType;
+
+  GuessPage({required this.itemType});
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var pair = appState.current;
+    appState.setItemType(itemType);
     var item = appState.currentItem;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Spacer(flex: 3),
-          SizedBox(height: 10),
           GuesserCard(item: item),
-          SizedBox(height: 20),
+          SizedBox(height: 30),
           Expanded(
             flex: 3,
             child: HistoryView(),
@@ -162,7 +153,7 @@ class HistoryView extends StatelessWidget {
       for (var guess in history)
         Center(
           child: Text(
-            "${guess.item.name} - ${guess.guessedPrice - guess.item.price}€",
+            "${guess.item.name} (${guess.item.price}€) - guessed at ${guess.guessedPrice}€ - score: +${guess.score.toStringAsFixed(0)}",
             semanticsLabel: guess.item.name,
           ),
         ),
@@ -180,6 +171,16 @@ class GuesserCard extends StatefulWidget {
 
   @override
   State<GuesserCard> createState() => _GuesserCardState();
+}
+
+class DecimalTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final regEx = RegExp(r'\d+(\.\d{0,2})?');
+    final String newString = regEx.stringMatch(newValue.text) ?? '';
+    return newString == newValue.text ? newValue : oldValue;
+  }
 }
 
 class _GuesserCardState extends State<GuesserCard> {
@@ -211,39 +212,41 @@ class _GuesserCardState extends State<GuesserCard> {
     return Column(
       children: [
         Container(
-          width: 300,
+          width: 500,
+          margin: EdgeInsets.symmetric(horizontal: 20), // for mobile view
           child: Card(
             color: theme.colorScheme.primary,
             elevation: 6,
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(40),
               child: Column(
                 children: [
                   Image.network(
                     widget.item.imageUrl,
-                    width: 100, // Adjust width as needed
+                    width: 400, // Adjust width as needed
                     height: 100, // Adjust height as needed
-                    fit: BoxFit.cover, // Adjust the fit of the image
+                    fit: BoxFit.contain, // Adjust the fit of the image
                   ),
+                  SizedBox(height: 20),
                   Text(
                     widget.item.name,
                     style: style,
                     semanticsLabel: widget.item.name,
-                  ),
-                  Text(
-                    "${widget.item.price}€",
-                    style: style,
-                    semanticsLabel: "${widget.item.price}€",
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 30),
         Container(
           width: 200,
           child: TextField(
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                DecimalTextInputFormatter()
+              ],
               focusNode: _focusNode,
               onSubmitted: (String value) {
                 double guess = double.parse(_controller.text);
@@ -252,11 +255,13 @@ class _GuesserCardState extends State<GuesserCard> {
               controller: _controller,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Enter your guess !',
+                suffixText: '€',
+                contentPadding: EdgeInsets.symmetric(horizontal: 35.0),
+                labelText: 'Enter your guess',
                 border: OutlineInputBorder(),
               )),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 30),
         ElevatedButton.icon(
           onPressed: () {
             if (_controller.text.isNotEmpty) {
@@ -267,41 +272,6 @@ class _GuesserCardState extends State<GuesserCard> {
           icon: Icon(Icons.send),
           label: Text('Guess'),
         ),
-      ],
-    );
-  }
-}
-
-class FavoritesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var appState = context.watch<MyAppState>();
-
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
-
-    return ListView(
-      children: [
-        SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text("Your ${appState.favorites.length} favorites:"),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: IconButton(
-              icon: Icon(Icons.delete_outline),
-              color: theme.colorScheme.primary,
-              onPressed: () {
-                appState.toggleFavorite(pair);
-              },
-            ),
-            title: Text(pair.asPascalCase),
-          ),
       ],
     );
   }
