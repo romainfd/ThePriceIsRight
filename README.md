@@ -1,18 +1,9 @@
-# the_price_is_right
+# The Price Is Right
 
-A new Flutter project.
+A simple project to use Flutter and Dart.
 
-Build based following Flutter codelab https://docs.flutter.dev/get-started/codelab
+The goal is to accurately determine the price of different items.
 
-## Getting Started
+The score is simply the sum of the absolute differences between the actual price and the guessed price.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The lower, the better! Let's go 🎮
