@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   deploy:
+    # Ref.: https://gist.github.com/doctor-g/96c69a05cb45db1fc3b911b3f7436a65
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -34,15 +35,17 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - run: flutter config --enable-web
-      - run: flutter pub get
-      - run: flutter build web --release
+      - name: Enable Flutter Web
+        run: flutter config --enable-web
+      - name: Download Flutter Dependencies
+        run: flutter pub get
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href=/ThePriceIsRight/
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: './build/web'
       - name: Deploy to GitHub Pages
         id: deployment
