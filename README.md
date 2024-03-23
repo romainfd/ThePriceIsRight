@@ -6,4 +6,4 @@ The goal is to accurately determine the price of different items.
 
 The score is simply the sum of the absolute differences between the actual price and the guessed price.
 
-The lower, the better! Let's go 🎮
+The lower, the better! Let's go and play [https://romainfd.github.io/ThePriceIsRight/](https://romainfd.github.io/ThePriceIsRight/) 🎮
